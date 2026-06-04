@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '../../../lib/prisma';
+import { supabase } from '../../../lib/supabase';
 
 export async function POST(request: Request) {
   try {
-    // Check if DATABASE_URL is set to avoid Prisma initialization errors
-    if (!process.env.DATABASE_URL) {
-      console.error('DATABASE_URL is not set in environment variables');
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      console.error('Supabase credentials are not set');
       return NextResponse.json({ error: 'Database configuration error' }, { status: 500 });
     }
 
@@ -15,29 +17,20 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const contact = await prisma.contact.create({
-      data: {
-        name,
-        email,
-        phone,
-      },
-    });
+    const { data, error } = await supabase
+      .from('contacts')
+      .insert([
+        { name, email, phone }
+      ])
+      .select();
 
-    return NextResponse.json({ success: true, data: contact });
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true, data });
   } catch (error: any) {
     console.error('Error saving contact:', error);
-
-    // Check for specific Prisma errors
-    if (error.message?.includes('Can\'t reach database server')) {
-      return NextResponse.json({
-        error: 'Database connection unreachable. Please check your DB settings and Pooler configuration.'
-      }, { status: 500 });
-    }
-
-    if (error.message?.includes('DATABASE_URL')) {
-      return NextResponse.json({ error: 'Database connection string error' }, { status: 500 });
-    }
-
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
