@@ -27,9 +27,15 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error('Error saving contact:', error);
 
-    // Check for specific Prisma initialization errors
+    // Check for specific Prisma errors
+    if (error.message?.includes('Can\'t reach database server')) {
+      return NextResponse.json({
+        error: 'Database connection unreachable. Please check your DB settings and Pooler configuration.'
+      }, { status: 500 });
+    }
+
     if (error.message?.includes('DATABASE_URL')) {
-      return NextResponse.json({ error: 'Database connection error' }, { status: 500 });
+      return NextResponse.json({ error: 'Database connection string error' }, { status: 500 });
     }
 
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
