@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
 
+interface SupabaseError {
+  message?: string;
+  code?: string;
+}
+
 export async function POST(request: Request) {
   try {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -29,8 +34,17 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
+  } catch (err: unknown) {
+    const error = err as SupabaseError;
     console.error('Error saving contact:', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+
+    let message = 'Internal Server Error';
+    if (error.message?.includes('Can\'t reach database server')) {
+       message = 'Database connection unreachable. Please check your DB settings.';
+    } else if (error.code === '42501') {
+       message = 'Database permission error (RLS). Please follow the README instructions.';
+    }
+
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

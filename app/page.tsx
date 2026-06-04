@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Layout, Calendar, Bell, Clock, ShieldCheck, Zap, User, Users, MessageSquare, TrendingUp, BarChart3, Link, Target, Check, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Calendar, Bell, Clock, ShieldCheck, Zap, User, Users, MessageSquare, TrendingUp, BarChart3, Link, Target, Check, X } from 'lucide-react';
 
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('self');
@@ -40,7 +40,7 @@ export default function LandingPage() {
       } else {
         setSubmitStatus('error');
       }
-    } catch (error) {
+    } catch {
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
