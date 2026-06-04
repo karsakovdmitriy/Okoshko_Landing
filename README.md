@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Лендинг «Окошко»
 
-## Getting Started
+Современный лендинг для экосистемы «Окошко» (онлайн-запись и автоматизация). Построен на Next.js 15, Tailwind CSS и Prisma.
 
-First, run the development server:
+## Инструкция по настройке базы данных и деплою
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Чтобы форма сбора контактов на лендинге заработала, необходимо настроить базу данных PostgreSQL и подключить её к проекту.
+
+### 1. Создание базы данных
+
+Вы можете использовать любой хостинг PostgreSQL. Рекомендуемые варианты:
+
+*   **Vercel Postgres:** Идеально, если вы деплоите проект на Vercel. Создается в один клик во вкладке "Storage" вашего проекта на Vercel.
+*   **Supabase:** Бесплатный и мощный вариант. Создайте проект на [supabase.com](https://supabase.com) и получите строку подключения (Connection String).
+*   **Neon:** Современный Serverless Postgres с бесплатным тарифом на [neon.tech](https://neon.tech).
+
+### 2. Настройка переменных окружения
+
+Вам понадобится переменная `DATABASE_URL`. Она выглядит примерно так:
+`postgresql://USER:PASSWORD@HOST:PORT/DATABASE?schema=public`
+
+#### Локально:
+Создайте файл `.env` в корне проекта и добавьте туда вашу строку:
+```env
+DATABASE_URL="ваш_адрес_бд"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### На Vercel:
+Перейдите в настройки проекта: **Settings** -> **Environment Variables** и добавьте переменную `DATABASE_URL`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Инициализация структуры базы данных
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+После того как база данных создана и адрес прописан, нужно создать в ней таблицу для контактов. Запустите команду:
 
-## Learn More
+```bash
+npx prisma db push
+```
 
-To learn more about Next.js, take a look at the following resources:
+Эта команда синхронизирует схему из файла `prisma/schema.prisma` с вашей реальной базой данных.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Деплой на Vercel
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1.  Загрузите код в ваш GitHub/GitLab репозиторий.
+2.  Импортируйте проект в Vercel.
+3.  Vercel автоматически обнаружит Next.js и предложит настройки.
+4.  **Важно:** Убедитесь, что вы добавили `DATABASE_URL` в Environment Variables.
+5.  Нажмите **Deploy**.
 
-## Deploy on Vercel
+В процессе сборки (build) автоматически выполнится команда `prisma generate`, которая подготовит клиент базы данных.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Разработка локально
+
+1.  Установите зависимости:
+    ```bash
+    npm install
+    ```
+2.  Настройте `.env` с локальной или удаленной БД.
+3.  Запустите сервер разработки:
+    ```bash
+    npm run dev
+    ```
+4.  Откройте [http://localhost:3000](http://localhost:3000).
+
+## Технологический стек
+*   **Frontend:** Next.js (App Router), React 19, Tailwind CSS, Lucide-React.
+*   **Backend:** Next.js Serverless Functions (API Routes).
+*   **ORM:** Prisma.
+*   **Database:** PostgreSQL.
